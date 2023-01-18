@@ -1,7 +1,7 @@
 from pickle import FALSE
 from django.shortcuts import redirect, render
-from django.http import HttpResponse
-from posApp.models import Category, Products, Sales, salesItems
+from django.http import HttpResponse, HttpResponseRedirect
+from posApp.models import Category, Products, Sales, salesItems, ProductReturns
 from django.db.models import Count, Sum
 from django.contrib import messages
 from django.contrib.auth import authenticate, login, logout
@@ -9,6 +9,7 @@ from django.contrib.auth.decorators import login_required
 from django.shortcuts import redirect
 import json, sys
 from datetime import date, datetime
+from posApp.forms import ReturnsForm
 
 # Login
 def login_user(request):
@@ -135,6 +136,7 @@ def products(request):
         'products':product_list,
     }
     return render(request, 'posApp/products.html',context)
+    
 @login_required
 def manage_products(request):
     product = {}
@@ -143,7 +145,7 @@ def manage_products(request):
         data =  request.GET
         id = ''
         if 'id' in data:
-            id= data['id']
+            id = data['id']
         if id.isnumeric() and int(id) > 0:
             product = Products.objects.filter(id=id).first()
     
@@ -170,9 +172,14 @@ def save_product(request):
         category = Category.objects.filter(id = data['category_id']).first()
         try:
             if (data['id']).isnumeric() and int(data['id']) > 0 :
-                save_product = Products.objects.filter(id = data['id']).update(code=data['code'], category_id=category, name=data['name'], description = data['description'], price = float(data['price']),status = data['status'])
+                save_product = Products.objects.filter(id = data['id']).update(code=data['code'], 
+                category_id=category, name=data['name'], description = data['description'], 
+                price = float(data['price']),status = data['status'], minimum_stock=data['minimum_stock'],
+                product_count=data['product_count'], measurement_units=data['measurement_units'])
             else:
-                save_product = Products(code=data['code'], category_id=category, name=data['name'], description = data['description'], price = float(data['price']),status = data['status'])
+                save_product = Products(code=data['code'], category_id=category, name=data['name'], 
+                description = data['description'], price = float(data['price']),status = data['status'], minimum_stock=data['minimum_stock'],
+                product_count=data['product_count'], measurement_units=data['measurement_units'])
                 save_product.save()
             resp['status'] = 'success'
             messages.success(request, 'Product Successfully saved.')
@@ -238,7 +245,12 @@ def save_pos(request):
             sale = Sales.objects.filter(id=sale_id).first()
             product = Products.objects.filter(id=product_id).first()
             qty = data.getlist('qty[]')[i] 
-            price = data.getlist('price[]')[i] 
+
+            if int(qty) <= product.product_count:
+                product.product_count -= int(qty)
+                product.save()
+
+            price = data.getlist('price[]')[i]
             total = float(qty) * float(price)
             print({'sale_id' : sale, 'product_id' : product, 'qty' : qty, 'price' : price, 'total' : total})
             salesItems(sale_id = sale, product_id = product, qty = qty, price = price, total = total).save()
@@ -305,3 +317,42 @@ def delete_sale(request):
         resp['msg'] = "An error occured"
         print("Unexpected error:", sys.exc_info()[0])
     return HttpResponse(json.dumps(resp), content_type='application/json')
+
+@login_required
+def returns(request):
+    now = datetime.now()
+    current_year = now.strftime("%Y")
+    current_month = now.strftime("%m")
+    current_day = now.strftime("%d")
+
+    user_returns = ProductReturns.objects.filter(
+        created__year=current_year,
+        created__month = current_month,
+        created__day = current_day
+    )
+    user_returns_total = len(user_returns)
+    products = Products.objects.all()
+
+    if request.method == "POST":
+        return_form = ReturnsForm(request.POST)
+        if return_form.is_valid():
+            product = return_form.cleaned_data["product"]
+            prod = Products.objects.get(id=product.id)
+            prod.product_count += return_form.cleaned_data["return_quantity"]
+            prod.save()
+            return_form.save()
+            messages.success(request, "Return completed!")
+            return HttpResponseRedirect("#success-return")
+    else:
+        return_form = ReturnsForm()
+
+    context = {
+        "user_returns": user_returns,
+        "user_returns_total": user_returns_total,
+        "return_form": return_form,
+        "products": products,
+    }
+    return render(request, "posApp/reconsile.html", context)
+
+def edit_return(request, return_id):
+    pass

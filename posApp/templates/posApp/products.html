@@ -29,6 +29,8 @@
                         <th class="text-center py-1">Product</th>
                         <th class="text-center py-1">Description</th>
                         <th class="text-center py-1">Status</th>
+                        <th class="text-center py-1">Quantity</th>
+                        <th class="text-center py-1">Measurement Units</th>
                         <th class="text-center py-1">Action</th>
                     </tr>
                 </thead>
@@ -41,8 +43,12 @@
                         <td class="px-2 py-1 text-start">{{ product.description }}</td>
                         <td class="px-2 py-1 text-center">
                             {% if product.status == 1 %}
-                            <span class="badge bg-primary rounded-pill px-3">Active</span> {% else %}
-                            <span class="badge bg-secondary rounded-pill px-3">Inactive</span> {% endif %}
+                            <span class="badge bg-primary rounded-pill px-3">In Stock</span> 
+                            {% else %}
+                            <span class="badge bg-secondary rounded-pill px-3">Out Of Stock</span> 
+                            {% endif %}
+                        <td class="px-2 py-1 text-center">{{ product.product_count }}</td>
+                        <td class="px-2 py-1 text-center">{{ product.measurement_units }}</td>
                         </td>
                         <td class="px-2 py-1 text-center">
                             <button class="mdc-button mdc-button--raised p-1 icon-button filled-button--light mdc-ripple-upgraded edit-data" type="button" data-id="{{ product.pk }}" title="Edit">
@@ -59,7 +65,8 @@
         </div>
     </div>
 </div>
-{% endblock pageContent %} {% block ScriptBlock %}
+{% endblock pageContent %} 
+{% block ScriptBlock %}
 <script>
     $(function() {
         $('#create_new').click(function() {

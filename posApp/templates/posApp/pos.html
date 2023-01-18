@@ -21,7 +21,7 @@
                             <select id="product-id" class="form-select form-select-sm">
                                 <option value="" disabled selected></option>
                                 {% for product in products %}
-                                    <option value="{{ product.pk }}">{{ product }}</option>
+                                    <option value="{{ product.pk }}">{{ product.code }} - {{product.name}} - Remaining: ( {{product.product_count}} {{product.measurement_units}}{{product.product_count|pluralize}})</option>
                                 {% endfor %}
                             </select>
                         </div>

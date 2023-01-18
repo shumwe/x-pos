@@ -20,7 +20,7 @@
                 <option value="{{ category.id }}">{{ category.name }}</option>
                 {% endif %}
             {% endfor %}
-        </select>
+            </select>
             <div class="form-group mb-3">
                 <label for="name" class="control-label">Product Name</label>
                 <input type="text" name="name" id="name" class="form-control form-control-sm rounded-0" value="{% if product.name %}{{product.name}}{% endif %}" required>
@@ -36,18 +36,29 @@
             <div class="form-group mb-3">
                 <label for="status" class="control-label">Status</label>
                 <select name="status" id="status" class="form-select form-select-sm rounded-0" required>
-            {% if product.status and product.status == 1 %}
-            <option value="1" selected>Active</option>
-            {% else %}
-            <option value="1">Active</option>
-            {% endif %}
-
-            {% if product.status and product.status == 0 %}
-            <option value="0" selected>Inactive</option>
-            {% else %}
-            <option value="0">Inactive</option>
-            {% endif %}
-        </select>
+                    {% if product.status and product.status == 1 %}
+                    <option value="1" selected>Active</option>
+                    {% else %}
+                    <option value="1">Active</option>
+                    {% endif %}
+                    {% if product.status and product.status == 0 %}
+                    <option value="0" selected>Inactive</option>
+                    {% else %}
+                    <option value="0">Inactive</option>
+                    {% endif %}
+                </select>
+            </div>measurement_units
+            <div class="form-group mb-3">
+                <label for="price" class="control-label">Number Of products</label>
+                <input type="number" name="product_count" id="product_count" class="form-control form-control-sm rounded-0" value="{% if product.product_count %}{{product.product_count}}{% endif %}" required>
+            </div>
+            <div class="form-group mb-3">
+                <label for="price" class="control-label">Measurement Units</label>
+                <input type="text" name="measurement_units" id="measurement_units" class="form-control form-control-sm rounded-0" value="{% if product.measurement_units %}{{product.measurement_units}}{% endif %}" required>
+            </div>
+            <div class="form-group mb-3">
+                <label for="price" class="control-label">Minimum Stock <em class="text-danger">(warn when low)</em></label>
+                <input type="number" name="minimum_stock" id="minimum_stock" class="form-control form-control-sm rounded-0" value="{% if product.minimum_stock %}{{product.minimum_stock}}{% endif %}" required>
             </div>
     </form>
     </div>
