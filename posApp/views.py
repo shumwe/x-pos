@@ -1,7 +1,7 @@
 from pickle import FALSE
 from django.shortcuts import redirect, render
 from django.http import HttpResponse, HttpResponseRedirect
-from posApp.models import Category, Products, Sales, salesItems, ProductReturns
+from posApp.models import Category, Products, Sales, salesItems, ProductReturns, Notify
 from django.db.models import Count, Sum
 from django.contrib import messages
 from django.contrib.auth import authenticate, login, logout
@@ -198,12 +198,14 @@ def delete_product(request):
     except:
         resp['status'] = 'failed'
     return HttpResponse(json.dumps(resp), content_type="application/json")
+
 @login_required
 def pos(request):
     products = Products.objects.filter(status = 1)
     product_json = []
     for product in products:
         product_json.append({'id':product.id, 'name':product.name, 'price':float(product.price)})
+        
     context = {
         'page_title' : "Point of Sale",
         'products' : products,
@@ -354,5 +356,25 @@ def returns(request):
     }
     return render(request, "posApp/reconsile.html", context)
 
-def edit_return(request, return_id):
-    pass
+def notify(request):
+    products = Products.objects.all()
+    low_stock_products = []
+    nots = Notify.objects.filter(resolved=False)
+    if products:
+        for prod in products:
+            if prod.is_low_stock:
+                    low_stock_products.append(prod)
+                    check_if_exists = Notify.objects.filter(product__code=prod.code, resolved=False)
+                    if check_if_exists:
+                        pass
+                    else:
+                        Notify.objects.create(
+                            title=f"{prod.name} is out of stock", product=prod
+                        )
+                        messages.info(request, f"{prod.name}: is low in stock")
+
+    context = {
+        "low_stock_products": low_stock_products,
+        "nots": nots,
+    }
+    return render(request, "posApp/notify.html", context)

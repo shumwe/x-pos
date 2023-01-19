@@ -25,6 +25,12 @@
                     </a>
                 </div>
                 <div class="mdc-list-item mdc-drawer-item">
+                    <a class="mdc-drawer-link" href="{% url 'notify' %}">
+                        <i class="material-icons mdc-list-item__start-detail mdc-drawer-item-icon" aria-hidden="true">message</i> Low Stock 
+                        <span class="badge bg-gradient rounded-pill ms-2 text-danger">{{low_stock_notifications}}</span>
+                    </a>
+                </div>
+                <div class="mdc-list-item mdc-drawer-item">
                     <a class="mdc-drawer-link" href="{% url 'pos-page' %}">
                         <i class="material-icons mdc-list-item__start-detail mdc-drawer-item-icon" aria-hidden="true">payment</i> POS
                     </a>

@@ -1,7 +1,6 @@
 {% extends "base.html" %}
 
 {% block pageContent %}
-
 <div class="mdc-layout-grid__cell stretch-card mdc-layout-grid__cell--span-12">
     <div class="mdc-card py-2">
         <div class="d-flex justify-content-between align-items-center">
@@ -29,7 +28,7 @@
                     <div class="col-lg-3 col-md-5 col-md-12">
                         <div class="form-group mb-3">
                             <label for="product-qty">Qty</label>
-                            <input type="number" class="form-control form-control-sm text-center" step="any" id="product-qty" value="1">
+                            <input type="number" class="form-control form-control-sm text-center" step="any" id="product-qty" value="1" max="">
                         </div>
                     </div>
                     <div class="col-lg-4 col-md-2 col-md-12">
@@ -153,7 +152,6 @@
         $('[name="grand_total"]').val(parseFloat(sub_total))
         $('#sub_total').text(parseFloat(sub_total).toLocaleString('en-US'))
         $('[name="sub_total"]').val(parseFloat(sub_total))
-
     }
     $(function() {
         $('#product-id').select2({
@@ -168,6 +166,7 @@
                 alert("Product and Quantity Field is required!")
                 return false
             }
+            //if (qty > ){} 
             if (!!prod_arr[id]) {
                 if ($('#POS-field table tbody input[name="product_id[]"][value="' + id + '"]').length > 0) {
                     alert('Item Already in the List.')

@@ -45,7 +45,7 @@ class Products(models.Model):
     name = models.TextField()
     description = models.TextField()
     price = models.FloatField(default=0)
-    status = models.IntegerField(default=1) 
+    status = models.IntegerField(default=1)
     date_added = models.DateTimeField(default=timezone.now) 
     date_updated = models.DateTimeField(auto_now=True)
     product_count = models.IntegerField(default=10)
@@ -54,7 +54,14 @@ class Products(models.Model):
 
     def __str__(self):
         return self.code + " - " + self.name
-
+    
+    @property
+    def is_low_stock(self):
+        if self.minimum_stock >= self.product_count:
+            return True
+        else:
+            return False
+            
     class Meta:
         verbose_name = "Product"
         verbose_name_plural = verbose_name
@@ -96,4 +103,14 @@ class ProductReturns(models.Model):
 
     class Meta:
         verbose_name = "Product Returns"
+        verbose_name_plural = verbose_name
+
+class Notify(models.Model):
+    title = models.CharField(max_length=155)
+    product = models.ForeignKey(Products, on_delete=models.CASCADE, related_name="product_notify")
+    resolved = models.BooleanField(default=False)
+    created = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        verbose_name = "Low Stock Notifications"
         verbose_name_plural = verbose_name
