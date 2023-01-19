@@ -17,7 +17,7 @@ def resolve_stock_notifaction(request):
                 if product.product_count > product.minimum_stock:
                     n.resolved = True
                     n.save()
-                else:
+                elif product.product_count <= product.minimum_stock:
                     n.resolved = False
                     n.save()
             return {"True": True}

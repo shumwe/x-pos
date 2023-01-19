@@ -36,3 +36,28 @@ Run the application
 ``` bash
 pythton manage.py runserver
 ```
+
+## Installing
+
+ensure python is installed
+
+``` bash
+python --version
+```
+
+build the project
+
+``` text
+double click build.bat
+```
+
+run the project
+
+``` text
+double click run.bat
+```
+
+```
+password: Pos12345
+username: admin
+```

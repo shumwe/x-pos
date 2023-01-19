@@ -371,7 +371,7 @@ def notify(request):
                         Notify.objects.create(
                             title=f"{prod.name} is out of stock", product=prod
                         )
-                        messages.info(request, f"{prod.name}: is low in stock")
+                        messages.info(request, f"{prod.name}: is running low in stock")
 
     context = {
         "low_stock_products": low_stock_products,
