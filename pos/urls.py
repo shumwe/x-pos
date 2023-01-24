@@ -14,6 +14,6 @@ urlpatterns = [
 if settings.DEBUG == True:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 
-admin.site.site_header = "Point Of Sell Admin"
+admin.site.site_header = "JULLIVAM HARDWARE"
 admin.site.site_title = "POS"
 admin.site.index_title = 'Welcome'

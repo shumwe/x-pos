@@ -413,6 +413,7 @@ def returns(request):
     }
     return render(request, "posApp/reconsile.html", context)
 
+@login_required
 def notify(request):
     products = Products.objects.all()
     low_stock_products = []
@@ -436,7 +437,7 @@ def notify(request):
     }
     return render(request, "posApp/notify.html", context)
 
-
+@login_required
 def profit_margins(request, product_id):
     now = datetime.now()
     current_year = now.strftime("%Y")
