@@ -26,6 +26,12 @@ urlpatterns = [
     path('delete_sale', views.delete_sale, name="delete-sale"),
     path('reconsile/', views.returns, name="reconsile"),
     path("notify/", views.notify, name="notify"),
+    path("customers/", views.customers, name="customers"),
+    path('customers/<slug>/delete/', views.CustomerDeleteView.as_view(), name="delete_customer"),
+    path('customers/<slug:slug>/edit', views.edit_cusomer, name="edit_customer"),
+    path('customers/<slug:slug>/history/', views.customer_history, name="customer_history"),
+    path('sales/profits/<int:product_id>/', views.profit_margins, name='profit_margins'),
+
     # path('employees', views.employees, name="employee-page"),
     # path('manage_employees', views.manage_employees, name="manage_employees-page"),
     # path('save_employee', views.save_employee, name="save-employee-page"),

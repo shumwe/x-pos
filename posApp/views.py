@@ -1,15 +1,16 @@
 from pickle import FALSE
+from django.urls import reverse
 from django.shortcuts import redirect, render
 from django.http import HttpResponse, HttpResponseRedirect
-from posApp.models import Category, Products, Sales, salesItems, ProductReturns, Notify
+from posApp.models import Category, Products, Sales, salesItems, ProductReturns, Notify, TrustedCustomerProfile
 from django.db.models import Count, Sum
 from django.contrib import messages
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
-from django.shortcuts import redirect
 import json, sys
 from datetime import date, datetime
-from posApp.forms import ReturnsForm
+from posApp.forms import ReturnsForm, AddCustomerForm
+from django.views.generic import DeleteView
 
 # Login
 def login_user(request):
@@ -36,6 +37,55 @@ def login_user(request):
 def logoutuser(request):
     logout(request)
     return redirect('/')
+
+def customers(request):
+    customers = TrustedCustomerProfile.objects.all()
+    if request.method == "POST":
+        add_form = AddCustomerForm(request.POST)
+        if add_form.is_valid():
+            add_form.save()
+            messages.success(request, "Customer waas added")
+            return HttpResponseRedirect("")
+    else:
+        add_form = AddCustomerForm()
+    context = {
+        "add_form": add_form,
+        "customers": customers,
+    }
+    return render(request, "posApp/customers.html", context)
+
+def edit_cusomer(request, slug):
+    customer = TrustedCustomerProfile.objects.get(slug=slug)
+    if request.method == "POST":
+        edit_form = AddCustomerForm(request.POST, instance=customer)
+        if edit_form.is_valid():
+            edit_form.save()
+            messages.success(request, "Customer updated")
+            return redirect("customers")
+    else:
+        edit_form = AddCustomerForm(instance=customer)
+
+    return render(request, "posApp/edit_customer.html", context={"edit_form": edit_form, "customer": customer})
+
+def customer_history(request, slug):
+    customer = TrustedCustomerProfile.objects.get(slug=slug)
+    sales_history = Sales.objects.filter(customer__slug=customer.slug)
+    sales_items_products = salesItems.objects.filter(sale_id__in=sales_history).distinct().order_by('-created')
+
+    context = {
+        "items_history": sales_items_products,
+        "customer": customer
+    }
+    return render(request, "posApp/customer_history.html", context)
+
+
+class CustomerDeleteView(DeleteView):
+    model = TrustedCustomerProfile
+    template_name = 'posApp/delete_customer.html'
+    context_object_name = "customer"
+
+    def get_success_url(self):
+        return reverse("customers")
 
 # Create your views here.
 @login_required
@@ -67,12 +117,6 @@ def home(request):
     return render(request, 'posApp/home.html',context)
 
 
-def about(request):
-    context = {
-        'page_title':'About',
-    }
-    return render(request, 'posApp/about.html',context)
-
 #Categories
 @login_required
 def category(request):
@@ -83,6 +127,7 @@ def category(request):
         'category':category_list,
     }
     return render(request, 'posApp/category.html',context)
+
 @login_required
 def manage_category(request):
     category = {}
@@ -174,12 +219,12 @@ def save_product(request):
             if (data['id']).isnumeric() and int(data['id']) > 0 :
                 save_product = Products.objects.filter(id = data['id']).update(code=data['code'], 
                 category_id=category, name=data['name'], description = data['description'], 
-                price = float(data['price']),status = data['status'], minimum_stock=data['minimum_stock'],
-                product_count=data['product_count'], measurement_units=data['measurement_units'])
+                buying_price = float(data['buying_price']), price = float(data['price']),status = data['status'], minimum_stock=data['minimum_stock'],
+                product_count=data['product_count'], measurement_units=data['measurement_units'], bought_count=data['bought_count'])
             else:
                 save_product = Products(code=data['code'], category_id=category, name=data['name'], 
-                description = data['description'], price = float(data['price']),status = data['status'], minimum_stock=data['minimum_stock'],
-                product_count=data['product_count'], measurement_units=data['measurement_units'])
+                description = data['description'], buying_price = float(data['buying_price']), price = float(data['price']),status = data['status'], minimum_stock=data['minimum_stock'],
+                product_count=data['product_count'], measurement_units=data['measurement_units'], bought_count=data['bought_count'])
                 save_product.save()
             resp['status'] = 'success'
             messages.success(request, 'Product Successfully saved.')
@@ -201,7 +246,8 @@ def delete_product(request):
 
 @login_required
 def pos(request):
-    products = Products.objects.filter(status = 1)
+    _customers = TrustedCustomerProfile.objects.all()
+    products = Products.objects.filter(status=1)
     product_json = []
     for product in products:
         product_json.append({'id':product.id, 'name':product.name, 'price':float(product.price)})
@@ -209,9 +255,9 @@ def pos(request):
     context = {
         'page_title' : "Point of Sale",
         'products' : products,
+        'customers': _customers,
         'product_json' : json.dumps(product_json)
     }
-    # return HttpResponse('')
     return render(request, 'posApp/pos.html',context)
 
 @login_required
@@ -219,10 +265,11 @@ def checkout_modal(request):
     grand_total = 0
     if 'grand_total' in request.GET:
         grand_total = request.GET['grand_total']
+
     context = {
         'grand_total' : grand_total,
     }
-    return render(request, 'posApp/checkout.html',context)
+    return render(request, 'posApp/checkout.html', context)
 
 @login_required
 def save_pos(request):
@@ -239,7 +286,17 @@ def save_pos(request):
     code = str(pref) + str(code)
 
     try:
-        sales = Sales(code=code, sub_total = data['sub_total'], tax = data['tax'], tax_amount = data['tax_amount'], grand_total = data['grand_total'], tendered_amount = data['tendered_amount'], amount_change = data['amount_change']).save()
+        sales = Sales(code=code, sub_total = data['sub_total'], tax = data['tax'], tax_amount = data['tax_amount'], 
+            grand_total = data['grand_total'], tendered_amount = data['tendered_amount'], 
+            amount_change = data['amount_change'])
+        try:
+            customer_id = int(request.POST.get('customer'))
+            customer = TrustedCustomerProfile.objects.get(id=customer_id)
+            sales.customer = customer
+            sales.save()
+        except:
+            sales.save()
+
         sale_id = Sales.objects.last().pk
         i = 0
         for prod in data.getlist('product_id[]'):
@@ -378,3 +435,42 @@ def notify(request):
         "nots": nots,
     }
     return render(request, "posApp/notify.html", context)
+
+
+def profit_margins(request, product_id):
+    now = datetime.now()
+    current_year = now.strftime("%Y")
+    current_month = now.strftime("%m")
+    # current_day = now.strftime("%d")
+
+    product = Products.objects.get(id=product_id)
+    sold_items = salesItems.objects.filter(
+        product_id__id=product.id,
+        #created__year=current_year,
+        #created__month = current_month,
+    )
+
+    total_sales = 0
+    buying_cost = 0
+    profit_margin = 0
+    sold_products_count = 0
+
+
+    if len(sold_items) > 0:
+        for item in sold_items:
+            total_sales += ((item.price)*(item.qty))
+            sold_products_count += (item.qty)
+
+        buying_cost = (product.buying_price * sold_products_count)
+        profit_margin = (total_sales - buying_cost)
+    else:
+        pass
+
+    context = {
+        "product": product,
+        "sold_items": sold_items,
+        "total_sales": total_sales,
+        "profit_margin": profit_margin,
+        "sold_products_count": sold_products_count
+    }
+    return render(request, "posApp/profit_margins.html", context)

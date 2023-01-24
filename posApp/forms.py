@@ -1,5 +1,5 @@
 from django import forms
-from posApp.models import ProductReturns
+from posApp.models import ProductReturns, TrustedCustomerProfile
 
 
 class ReturnsForm(forms.ModelForm):
@@ -9,3 +9,8 @@ class ReturnsForm(forms.ModelForm):
         widgets = {
             "product": forms.Select(attrs={"style": "width:100%"})
         }
+
+class AddCustomerForm(forms.ModelForm):
+    class Meta:
+        model = TrustedCustomerProfile
+        exclude = ["slug",]

@@ -1,9 +1,7 @@
 from posApp.models import Notify, Products
 
 def low_stock(request):
-    notifications = Notify.objects.filter(
-        resolved=False
-    )
+    notifications = Notify.objects.filter(resolved=False)
     len_notifications = len(notifications)
     return dict(low_stock_notifications=len_notifications)
 

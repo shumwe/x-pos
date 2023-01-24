@@ -2,6 +2,8 @@ from datetime import datetime
 from unicodedata import category
 from django.db import models
 from django.utils import timezone
+from django.template.defaultfilters import slugify
+from datetime import datetime
 
 # Create your models here.
 
@@ -25,6 +27,26 @@ from django.utils import timezone
 
     # def __str__(self):
     #     return self.firstname + ' ' +self.middlename + ' '+self.lastname + ' '
+
+def avatar_path(instance, filename):
+    return f"avatars/{instance.customer_id}/{filename}"
+
+class TrustedCustomerProfile(models.Model):
+    name = models.CharField(max_length=65)
+    email = models.EmailField(null=True, blank=True)
+    avatar = models.ImageField(upload_to=avatar_path, default="ava.jpg", blank=True)
+    slug = models.SlugField(unique=True, blank=True, verbose_name="Customer Id")
+    created = models.DateTimeField(auto_now_add=True)
+    updated = models.DateTimeField(auto_now=True)
+
+    def save(self, *args, **kwargs):
+        if not self.slug:
+            self.slug = '-'.join((slugify(self.name), slugify(datetime.now())))
+        return super(TrustedCustomerProfile, self).save(*args, **kwargs)
+
+    def __str__(self):
+        return f"{self.name}"
+
 class Category(models.Model):
     name = models.TextField()
     description = models.TextField()
@@ -44,10 +66,12 @@ class Products(models.Model):
     category_id = models.ForeignKey(Category, on_delete=models.CASCADE)
     name = models.TextField()
     description = models.TextField()
+    buying_price = models.FloatField(default=0)
     price = models.FloatField(default=0)
     status = models.IntegerField(default=1)
     date_added = models.DateTimeField(default=timezone.now) 
     date_updated = models.DateTimeField(auto_now=True)
+    bought_count = models.IntegerField(default=0)
     product_count = models.IntegerField(default=10)
     measurement_units = models.CharField(max_length=55, default="units")
     minimum_stock = models.IntegerField(default=1, help_text="warning, low stock!!!")
@@ -75,7 +99,8 @@ class Sales(models.Model):
     tendered_amount = models.FloatField(default=0)
     amount_change = models.FloatField(default=0)
     date_added = models.DateTimeField(default=timezone.now) 
-    date_updated = models.DateTimeField(auto_now=True) 
+    date_updated = models.DateTimeField(auto_now=True)
+    customer = models.ForeignKey(TrustedCustomerProfile, on_delete=models.CASCADE, related_name="customer", null=True, blank=True)
 
     def __str__(self):
         return self.code
@@ -85,11 +110,12 @@ class Sales(models.Model):
         verbose_name_plural = verbose_name
 
 class salesItems(models.Model):
-    sale_id = models.ForeignKey(Sales,on_delete=models.CASCADE)
+    sale_id = models.ForeignKey(Sales, on_delete=models.CASCADE)
     product_id = models.ForeignKey(Products,on_delete=models.CASCADE)
     price = models.FloatField(default=0)
     qty = models.FloatField(default=0)
     total = models.FloatField(default=0)
+    created = models.DateTimeField(auto_now_add=True)
 
     class Meta:
         verbose_name = "Sales Items"
