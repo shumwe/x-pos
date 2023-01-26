@@ -30,7 +30,8 @@ urlpatterns = [
     path('customers/<slug>/delete/', views.CustomerDeleteView.as_view(), name="delete_customer"),
     path('customers/<slug:slug>/edit', views.edit_cusomer, name="edit_customer"),
     path('customers/<slug:slug>/history/', views.customer_history, name="customer_history"),
-    path('sales/profits/<int:product_id>/', views.profit_margins, name='profit_margins'),
+    path('sales/profits/', views.overall_profis_and_loss, name="overall_profis_and_loss"),
+    path('sales/profits/<int:product_id>/', views.product_profit_margins, name='profit_margins'),
 
     # path('employees', views.employees, name="employee-page"),
     # path('manage_employees', views.manage_employees, name="manage_employees-page"),

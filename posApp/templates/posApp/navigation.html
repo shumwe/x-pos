@@ -25,6 +25,11 @@
                     </a>
                 </div>
                 <div class="mdc-list-item mdc-drawer-item">
+                    <a class="mdc-drawer-link " href="{% url 'overall_profis_and_loss' %}">
+                        <i class="material-icons mdi mdi-cash-multiple"></i> <span class="ml-2">Profit and Loss Margins</span>
+                    </a>
+                </div>
+                <div class="mdc-list-item mdc-drawer-item">
                     <a class="mdc-drawer-link" href="{% url 'notify' %}">
                         <i class="material-icons mdc-list-item__start-detail mdc-drawer-item-icon" aria-hidden="true">message</i> Low Stock 
                         <span class="badge bg-gradient rounded-pill ms-2 text-danger">{{low_stock_notifications}}</span>

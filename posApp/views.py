@@ -106,7 +106,7 @@ def home(request):
         date_added__month = current_month,
         date_added__day = current_day
     ).all()
-    total_sales = sum(today_sales.values_list('grand_total',flat=True))
+    total_sales = sum(today_sales.values_list('grand_total', flat=True))
     context = {
         'page_title':'Home',
         'categories' : categories,
@@ -325,6 +325,8 @@ def save_pos(request):
 @login_required
 def salesList(request):
     sales = Sales.objects.all()
+    first_sale = Sales.objects.filter().first()
+    last_sale = Sales.objects.filter().last()
     sale_data = []
     for sale in sales:
         data = {}
@@ -341,6 +343,8 @@ def salesList(request):
     context = {
         'page_title':'Sales Transactions',
         'sale_data':sale_data,
+        'first_sale': first_sale,
+        'last_sale': last_sale,
     }
     # return HttpResponse('')
     return render(request, 'posApp/sales.html',context)
@@ -438,24 +442,77 @@ def notify(request):
     return render(request, "posApp/notify.html", context)
 
 @login_required
-def profit_margins(request, product_id):
+def overall_profis_and_loss(request):
+    now = datetime.now()
+    current_year = now.strftime("%Y")
+    current_month = now.strftime("%m")
+    current_day = now.strftime("%d")
+
+    sold_items_year = salesItems.objects.filter(created__year=current_year)    
+    # year
+    total_sales_year = 0
+    buying_cost_year = 0
+    sold_product_count_year = 0
+    profit_and_loss_year = 0
+
+    if len(sold_items_year) > 0:
+        for item in sold_items_year:
+            product = Products.objects.get(id=item.product_id.id)
+            total_sales_year += ((item.price)*(item.qty))
+            sold_product_count_year += (item.qty)
+            buying_cost_year += (product.buying_price)*(item.qty)
+        profit_and_loss_year = (total_sales_year - buying_cost_year)
+
+    # month
+    sales_items_month = salesItems.objects.filter(created__year=current_year, created__month = current_month)
+    total_sales_month = 0
+    buying_cost_month = 0
+    sold_product_count_month = 0
+    profit_and_loss_month = 0
+
+    if len(sales_items_month) > 0:
+        for item in sales_items_month:
+            product = Products.objects.get(id=item.product_id.id)
+            total_sales_month += ((item.price)*(item.qty))
+            sold_product_count_month += (item.qty)
+            buying_cost_month += (product.buying_price)*(item.qty)
+        profit_and_loss_month = (total_sales_month - buying_cost_month)
+
+    # today
+    sales_items_today = salesItems.objects.filter(created__year=current_year, created__month=current_month, created__day=current_day)
+    total_sales_today = 0
+    buying_cost_today = 0
+    sold_product_count_today = 0
+    profit_and_loss_today = 0
+
+    if len(sales_items_today) > 0:
+        for item in sales_items_month:
+            product = Products.objects.get(id=item.product_id.id)
+            total_sales_today += ((item.price)*(item.qty))
+            sold_product_count_today += (item.qty)
+            buying_cost_today += (product.buying_price)*(item.qty)
+        profit_and_loss_today = (total_sales_today - buying_cost_today)
+
+    context = {
+        "profit_and_loss_year": profit_and_loss_year, "total_sales_year": total_sales_year, "sold_product_count_year": sold_product_count_year,
+        "profit_and_loss_month": profit_and_loss_month, "total_sales_month": total_sales_month, "sold_product_count_month": sold_product_count_month,
+        "profit_and_loss_today": profit_and_loss_today, "total_sales_today": total_sales_today, "sold_product_count_today": sold_product_count_today
+    }
+    return render(request, "posApp/overall_profit_margins.html", context)
+
+@login_required
+def product_profit_margins(request, product_id):
     now = datetime.now()
     current_year = now.strftime("%Y")
     current_month = now.strftime("%m")
     # current_day = now.strftime("%d")
 
     product = Products.objects.get(id=product_id)
-    sold_items = salesItems.objects.filter(
-        product_id__id=product.id,
-        #created__year=current_year,
-        #created__month = current_month,
-    )
-
+    sold_items = salesItems.objects.filter(product_id__id=product.id,)
     total_sales = 0
     buying_cost = 0
     profit_margin = 0
     sold_products_count = 0
-
 
     if len(sold_items) > 0:
         for item in sold_items:
