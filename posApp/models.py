@@ -61,6 +61,9 @@ class Category(models.Model):
         verbose_name = "Category"
         verbose_name_plural = verbose_name
 
+def product_image_path(instance, filename):
+    return f"product/{instance.code}/{filename}"
+
 class Products(models.Model):
     code = models.CharField(max_length=100)
     category_id = models.ForeignKey(Category, on_delete=models.CASCADE)
@@ -75,6 +78,7 @@ class Products(models.Model):
     product_count = models.IntegerField(default=10)
     measurement_units = models.CharField(max_length=55, default="units")
     minimum_stock = models.IntegerField(default=1, help_text="warning, low stock!!!")
+    image = models.ImageField(default="default-image.jpg")
 
     def __str__(self):
         return self.code + " - " + self.name

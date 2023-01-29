@@ -1,5 +1,5 @@
 <div class="container-fluid">
-    <form action="" id="product-form">
+    <form action="" id="product-form" enctype="multipart/form-data">
         <input type="hidden" name="id" value="{% if product.pk %}{{product.pk}}{% endif %}">
         <div class="form-group mb-3">
             <label for="code" class="control-label">Code</label>
@@ -67,6 +67,10 @@
             <div class="form-group mb-3">
                 <label for="price" class="control-label">Minimum Stock <em class="text-danger">(warn when low)</em></label>
                 <input type="number" name="minimum_stock" id="minimum_stock" class="form-control form-control-sm rounded-0" value="{% if product.minimum_stock %}{{product.minimum_stock}}{% endif %}" required>
+            </div>
+            <div class="form-group mb-3">
+                <label for="product_image" class="control-label">Image &nbsp; {% if product.image %}Current: <a href="{{product.image}}">{{product.image}}</a>{% endif %}</label>
+                <input type="file" name="product_image" id="product_image" class="form-control form-control-sm rounded-0" accept="image/*">
             </div>
     </form>
     </div>

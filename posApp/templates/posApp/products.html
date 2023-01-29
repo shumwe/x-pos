@@ -40,7 +40,14 @@
                 <tbody>
                     {% for product in products %}
                     <tr>
-                        <td class="px-2 py-1 text-center">{{ product.code }}</td>
+                        <td class="px-2 py-1 text-start">
+                            <div class="d-flex align-items-center">
+                                <img src="{{ product.image }}" alt="image"  style="width: 45px; height: 45px" class="rounded-circle"/>
+                                <div class="ms-3">
+                                    <p class="fw-bold mb-1"> {{ product.code }}</p>
+                                </div>
+                            </div>
+                        </td>
                         <td class="px-2 py-1 text-start">{{ product.category_id }}</td>
                         <td class="px-2 py-1 text-start">{{ product.name|lower|capfirst }}</td>
                         <td class="px-2 py-1 text-start">{{ product.description }}</td>

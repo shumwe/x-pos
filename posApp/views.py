@@ -11,6 +11,8 @@ import json, sys
 from datetime import date, datetime
 from posApp.forms import ReturnsForm, AddCustomerForm
 from django.views.generic import DeleteView
+from django.conf import settings
+from django.core.files.storage import FileSystemStorage
 
 # Login
 def login_user(request):
@@ -203,6 +205,11 @@ def manage_products(request):
 @login_required
 def save_product(request):
     data =  request.POST
+    product_image = request.FILES['product_image']
+    if product_image:
+        fs = FileSystemStorage()
+        filename = fs.save(product_image.name, product_image)
+        uploaded_file_url = fs.url(filename)
     resp = {'status':'failed'}
     id= ''
     if 'id' in data:
@@ -220,11 +227,11 @@ def save_product(request):
                 save_product = Products.objects.filter(id = data['id']).update(code=data['code'], 
                 category_id=category, name=data['name'], description = data['description'], 
                 buying_price = float(data['buying_price']), price = float(data['price']),status = data['status'], minimum_stock=data['minimum_stock'],
-                product_count=data['product_count'], measurement_units=data['measurement_units'], bought_count=data['bought_count'])
+                product_count=data['product_count'], measurement_units=data['measurement_units'], bought_count=data['bought_count'], image=uploaded_file_url)
             else:
                 save_product = Products(code=data['code'], category_id=category, name=data['name'], 
                 description = data['description'], buying_price = float(data['buying_price']), price = float(data['price']),status = data['status'], minimum_stock=data['minimum_stock'],
-                product_count=data['product_count'], measurement_units=data['measurement_units'], bought_count=data['bought_count'])
+                product_count=data['product_count'], measurement_units=data['measurement_units'], bought_count=data['bought_count'], image=uploaded_file_url)
                 save_product.save()
             resp['status'] = 'success'
             messages.success(request, 'Product Successfully saved.')
