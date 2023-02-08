@@ -57,7 +57,12 @@
                             {% else %}
                             <span class="badge bg-secondary rounded-pill px-3">Out Of Stock</span> 
                             {% endif %}
-                        <td class="px-2 py-1 text-center">{{ product.product_count }}</td>
+                        <td class="px-2 py-1 text-center">
+                            {{ product.product_count }}
+                            <a href="{% url 'add_to_stock' product.id %}" class="ms-2 mdc-button mdc-button--raised p-1 icon-button filled-button--light mdc-ripple-upgraded" title="Add To Stock">
+                                <i class="material-icons mdc-button__icon">add</i>
+                            </a>
+                        </td>
                         <td class="px-2 py-1 text-center">{{ product.price }}</td>
                         <td class="px-2 py-1 text-center">{{ product.measurement_units }}</td>
                         </td>

@@ -203,13 +203,36 @@ def manage_products(request):
     return render(request, 'posApp/manage_product.html',context)
 
 @login_required
+def add_to_stock(request, product_id):
+    prod = Products.objects.get(id=product_id)
+
+    if request.method == "POST":
+        data = request.POST
+        number_to_add = int(request.POST["plus_number"])
+        prod.product_count += number_to_add
+        prod.save()
+        messages.error(request, "Product count updated")
+        return redirect("product-page")
+   
+    context = {
+        "prod": prod
+    }
+    return render(request, "posApp/add_to_sock.html", context)
+
+
+@login_required
 def save_product(request):
     data =  request.POST
-    product_image = request.FILES['product_image']
-    if product_image:
-        fs = FileSystemStorage()
-        filename = fs.save(product_image.name, product_image)
-        uploaded_file_url = fs.url(filename)
+
+    if "product_image" in request.FILES:
+        product_image = request.FILES['product_image']
+        if product_image:
+            fs = FileSystemStorage()
+            filename = fs.save(product_image.name, product_image)
+            uploaded_file_url = fs.url(filename)
+    else:
+        uploaded_file_url = "default-image.jpg"
+
     resp = {'status':'failed'}
     id= ''
     if 'id' in data:

@@ -15,6 +15,7 @@ urlpatterns = [
     path('save_category', views.save_category, name="save-category-page"),
     path('delete_category', views.delete_category, name="delete-category"),
     path('products', views.products, name="product-page"),
+    path('products/update-count/<int:product_id>/', views.add_to_stock, name="add_to_stock"),
     path('manage_products', views.manage_products, name="manage_products-page"),
     path('save_product', views.save_product, name="save-product-page"),
     path('delete_product', views.delete_product, name="delete-product"),
