@@ -279,6 +279,7 @@ def pos(request):
     _customers = TrustedCustomerProfile.objects.all()
     products = Products.objects.filter(status=1)
     product_json = []
+    
     for product in products:
         product_json.append({'id':product.id, 'name':product.name, 'price':float(product.price)})
         

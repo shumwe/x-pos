@@ -1,7 +1,6 @@
 {% load static %}
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -29,7 +28,6 @@
     {% block jquery %}
         <script src="{% static 'posApp/assets/default/js/jquery-3.6.0.min.js' %}"></script>
     {% endblock %}
-
     <script src="{% static 'posApp/assets/bootstrap/js/bootstrap.min.js' %}"></script>
     <script src="{% static 'posApp/assets/bootstrap/js/bootstrap.bundle.min.js' %}"></script>
     <script src="{% static 'posApp/assets/bootstrap/js/popper.min.js' %}"></script>
@@ -62,7 +60,6 @@
                                                 <button class="btn btn-primary btn-close btn-sm text-sm" type="button" onclick="$(this).closest('.alert').remove()"></button>
                                             </div>
                                         </div>
-
                                     </div>
                                 </div>
                                 {% endfor %}

@@ -1,10 +1,10 @@
 @echo off
 
 @REM Create Virtual Environment within the folder
-py -m venv env
+py -m venv .venv
 
 @REM Activate Virtual Environment
-env\Scripts\activate
+.venv\Scripts\activate
 
 @REM Install requirements In Virtual Environment
 pip install -r requirements.txt

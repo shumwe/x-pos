@@ -1,6 +1,10 @@
 @echo off
 rem Activate the virtual environment
-call .env\bin\Scripts\activate.bat
+call .venv\Scripts\activate.bat
+
+@Rem Run App Migrations
+python manage.py makemigrations
+python manage.py migrate
 
 rem Run the Django development server
 start python manage.py runserver & start http://127.0.0.1:8000/
